@@ -2,6 +2,8 @@ package com.cisc181.core;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /*
  * comment
@@ -83,21 +85,50 @@ public abstract class Person {
 	 * Constructors Constructor with arguments
 	 */
 
-	public Person(String FirstName, String MiddleName, String LastName,
-			Date DOB, String Address, String Phone_number, String Email) {
+	public Person(String FirstName, String MiddleName, String LastName, Date DOB, String Address, String Phone_number,
+			String Email) {
 		this.FirstName = FirstName;
 		this.MiddleName = MiddleName;
 		this.LastName = LastName;
-		this.DOB = DOB;
 		this.address = Address;
-		this.phone_number = Phone_number;
 		this.email_address = Email;
+
+		Calendar cal = Calendar.getInstance();
+		Calendar threshold = Calendar.getInstance();
+		cal.setTime(DOB);
+		threshold.set(1915, 10, 18, 0, 0, 0);
+		try {
+			if (cal.after(threshold)) {
+				this.DOB = DOB;
+			} else {
+				throw new PersonException(this);
+			}
+		} catch (PersonException ex) {
+			System.out.println(ex);
+		}
+
+		String regex = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
+
+		Pattern pattern = Pattern.compile(regex);
+
+		Matcher matcher = pattern.matcher(Phone_number);
+		System.out.println(Phone_number + " : " + matcher.matches());
 		
+		try {
+			if (matcher.matches()) {
+				this.phone_number = Phone_number;
+			}
+			else {
+				throw new PersonException(this);
+			}
+		}
+		catch (PersonException ex){
+			System.out.println(ex);
+		}
 	}
 
 	public void PrintName() {
-		System.out.println(this.FirstName + ' ' + this.MiddleName + ' '
-				+ this.LastName);
+		System.out.println(this.FirstName + ' ' + this.MiddleName + ' ' + this.LastName);
 	}
 
 	public void PrintDOB() {
@@ -117,16 +148,14 @@ public abstract class Person {
 
 		// If birth date is greater than todays date (after 2 days adjustment of
 		// leap year) then decrement age one year
-		if ((birthDate.get(Calendar.DAY_OF_YEAR)
-				- today.get(Calendar.DAY_OF_YEAR) > 3)
+		if ((birthDate.get(Calendar.DAY_OF_YEAR) - today.get(Calendar.DAY_OF_YEAR) > 3)
 				|| (birthDate.get(Calendar.MONTH) > today.get(Calendar.MONTH))) {
 			age--;
 
 			// If birth date and todays date are of same month and birth day of
 			// month is greater than todays day of month then decrement age
 		} else if ((birthDate.get(Calendar.MONTH) == today.get(Calendar.MONTH))
-				&& (birthDate.get(Calendar.DAY_OF_MONTH) > today
-						.get(Calendar.DAY_OF_MONTH))) {
+				&& (birthDate.get(Calendar.DAY_OF_MONTH) > today.get(Calendar.DAY_OF_MONTH))) {
 			age--;
 		}
 
